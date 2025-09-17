@@ -8,7 +8,6 @@ import { trailerLote } from "../records/trailerLote";
 import { trailerArquivo } from "../records/trailerArquivo";
 import { env } from "../env";
 
-// Mapeia tipo de chave Pix para código do layout
 const tipoChaveMap = {
   cpf: "01",
   cnpj: "02",
@@ -25,14 +24,13 @@ interface PagamentoPixDTO {
   tipoChavePix: TipoChavePix;
   valorCentavos: number;
   seuNumero: string;
-  dataPagamento: string; // ISO string ou yyyy-mm-dd
+  dataPagamento: string;
 }
 
 export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
   const w = new CnabWriter();
   const hoje = new Date();
 
-  // HEADER ARQUIVO
   w.add(
     headerArquivo({
       tipoInscricao: "2",
@@ -51,7 +49,6 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
     })
   );
 
-  // HEADER LOTE
   w.nextLote();
   w.add(
     headerLotePagamentos({
@@ -68,7 +65,6 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
     })
   );
 
-  // DETALHES
   for (const pagamento of pagamentos) {
     const seq = w.nextSeq();
 
@@ -92,10 +88,11 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
 
     w.addValorAtual(pagamento.valorCentavos);
 
+    const seqB = w.nextSeq();
     w.add(
       segmentoB_PIX({
         lote: w.lote,
-        seqNoLote: seq + 1,
+        seqNoLote: seqB,
         formaIniciacao: tipoChaveMap[pagamento.tipoChavePix],
         tipoInscricao: ["cpf", "cnpj"].includes(pagamento.tipoChavePix)
           ? "1"
@@ -109,7 +106,6 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
     );
   }
 
-  // TRAILER LOTE
   w.add(
     trailerLote({
       lote: w.lote,
@@ -118,7 +114,6 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
     })
   );
 
-  // TRAILER ARQUIVO
   const linhasAntesDo9 = w.getLinhas();
   w.add(
     trailerArquivo({
