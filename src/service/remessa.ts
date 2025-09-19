@@ -44,7 +44,7 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
       nomeEmpresa: env.EMPRESA_NOME,
       nomeBanco: "BANRISUL",
       dataGeracao: hoje,
-      nsa: 1,
+      nsa,
       versaoLayoutArquivo: "101",
     })
   );
