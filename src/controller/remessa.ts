@@ -7,7 +7,7 @@ export async function gerarRemessaController(
   reply: FastifyReply
 ) {
   const schema = z.object({
-    nsa: z.number(),
+    nsa: z.number().int().positive(),
     pagamentos: z.array(
       z.object({
         nomeFavorecido: z.string(),
@@ -28,10 +28,15 @@ export async function gerarRemessaController(
 
   const { nsa, pagamentos } = parsed.data;
 
-  const conteudo = gerarRemessaPix(nsa, pagamentos);
+  try {
+    const conteudo = gerarRemessaPix(nsa, pagamentos);
 
-  reply
-    .code(200)
-    .header("Content-Type", "text/plain; charset=latin1")
-    .send(conteudo);
+    reply
+      .code(200)
+      .header("Content-Type", "text/plain; charset=latin1")
+      .send(conteudo);
+  } catch (error) {
+    console.error("Erro ao gerar remessa manual:", error);
+    reply.status(500).send({ error: "Erro ao gerar remessa manual." });
+  }
 }
