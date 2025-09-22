@@ -1,6 +1,6 @@
 import fastify from "fastify";
-import remessaRoutes from "./routes/remessa";
-import duplicatasRoutes from "./routes/duplicatas";
+import shipmentRoutes from "./routes/shipmentRoutes";
+import paymentsRoutes from "./routes/paymentsRoutes";
 import cors from "@fastify/cors";
 import loginRoutes from "./routes/authRoutes";
 
@@ -12,8 +12,8 @@ app.register(cors, {
 
 app.register(loginRoutes);
 
-app.register(remessaRoutes, {
-  prefix: "remessa",
+app.register(shipmentRoutes, {
+  prefix: "shipment",
 });
 
-app.register(duplicatasRoutes);
+app.register(paymentsRoutes);

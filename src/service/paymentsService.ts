@@ -1,7 +1,7 @@
 import { knex } from "../database";
 
-export async function listarDuplicatas(dataInicial: string, dataFinal: string) {
-  const duplicatas = await knex("V_PG_DEB as v")
+export async function listPayments(dataInicial: string, dataFinal: string) {
+  const payments = await knex("V_PG_DEB as v")
     .join("PG_FORN as f", "v.CD_FORN", "f.CD_FORN")
     .select(
       "v.RZ_FORN as nomeFavorecido",
@@ -15,5 +15,5 @@ export async function listarDuplicatas(dataInicial: string, dataFinal: string) {
     .whereBetween("v.DT_VENCTO", [dataInicial, dataFinal])
     .whereIn("v.STS_DP", [0, 2, 5]);
 
-  return duplicatas;
+  return payments;
 }

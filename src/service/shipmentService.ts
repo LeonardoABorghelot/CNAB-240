@@ -27,7 +27,7 @@ interface PagamentoPixDTO {
   dataPagamento: string;
 }
 
-export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
+export function shipmentPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
   const w = new CnabWriter();
   const hoje = new Date();
 

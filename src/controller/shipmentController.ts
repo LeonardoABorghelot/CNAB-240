@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { gerarRemessaPix } from "../service/remessa";
+import { shipmentPix } from "../service/shipmentService";
 import { z } from "zod";
 
-export async function gerarRemessaController(
+export async function shipmentController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
@@ -29,14 +29,14 @@ export async function gerarRemessaController(
   const { nsa, pagamentos } = parsed.data;
 
   try {
-    const conteudo = gerarRemessaPix(nsa, pagamentos);
+    const conteudo = shipmentPix(nsa, pagamentos);
 
     reply
       .code(200)
       .header("Content-Type", "text/plain; charset=latin1")
       .send(conteudo);
   } catch (error) {
-    console.error("Erro ao gerar remessa manual:", error);
-    reply.status(500).send({ error: "Erro ao gerar remessa manual." });
+    console.error("Error generating manual shipment:", error);
+    reply.status(500).send({ error: "Error generating manual shipment:" });
   }
 }

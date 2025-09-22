@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { listarDuplicatas } from "../service/duplicatas";
+import { listPayments } from "../service/paymentsService";
 import { z } from "zod";
 
-export async function listarDuplicatasController(
+export async function listPaymentsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
@@ -20,10 +20,12 @@ export async function listarDuplicatasController(
   const { dataInicial, dataFinal } = parsed.data;
 
   try {
-    const duplicatas = await listarDuplicatas(dataInicial, dataFinal);
-    reply.send(duplicatas);
+    const payments = await listPayments(dataInicial, dataFinal);
+    reply.send(payments);
   } catch (error) {
-    console.log("Erro ao listar duplicatas:", error);
-    reply.status(500).send({ error: "Erro ao buscar duplicatas no banco." });
+    console.log("Error listing duplicates:", error);
+    reply
+      .status(500)
+      .send({ error: "Error while fetching duplicates from the database." });
   }
 }

@@ -9,7 +9,7 @@ export async function verificarToken(
   const authHeader = request.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return reply.status(401).send({ error: "Token JWT não fornecido." });
+    return reply.status(401).send({ error: "JWT token not provided." });
   }
 
   const token = authHeader.split(" ")[1];
@@ -17,13 +17,13 @@ export async function verificarToken(
   if (!token) {
     return reply
       .status(401)
-      .send({ error: "Token ausente no cabeçalho Authorization." });
+      .send({ error: "Token missing in the Authorization header." });
   }
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET);
     request.user = decoded;
   } catch (err) {
-    return reply.status(401).send({ error: "Token inválido ou expirado." });
+    return reply.status(401).send({ error: "Invalid or expired token." });
   }
 }
