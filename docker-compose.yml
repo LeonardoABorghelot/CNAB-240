@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: cnab-banrisul/Dockerfile
+    container_name: cnab-backend
+    ports:
+      - "90:90"
+    networks:
+      - minha-rede
+    environment:
+      HOST: 0.0.0.0
+      PORT: 90
+
+networks:
+  minha-rede:
+    driver: bridge

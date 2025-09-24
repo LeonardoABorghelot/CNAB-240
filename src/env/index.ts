@@ -11,6 +11,7 @@ const envSchema = z.object({
 
   JWT_SECRET: z.string(),
 
+  HOST: z.string(),
   PORT: z.preprocess((val) => Number(val), z.number()),
 
   EMPRESA_CNPJ: z.string().length(14, "CNPJ deve conter 14 dígitos numéricos"),
