@@ -1,13 +1,13 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { gerarRemessaPix } from "../service/remessa";
+import { shipmentPix } from "../service/shipmentService";
 import { z } from "zod";
 
-export async function gerarRemessaController(
+export async function shipmentController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const schema = z.object({
-    nsa: z.number(),
+    nsa: z.number().int().positive(),
     pagamentos: z.array(
       z.object({
         nomeFavorecido: z.string(),
@@ -28,10 +28,15 @@ export async function gerarRemessaController(
 
   const { nsa, pagamentos } = parsed.data;
 
-  const conteudo = gerarRemessaPix(nsa, pagamentos);
+  try {
+    const conteudo = shipmentPix(nsa, pagamentos);
 
-  reply
-    .code(200)
-    .header("Content-Type", "text/plain; charset=latin1")
-    .send(conteudo);
+    reply
+      .code(200)
+      .header("Content-Type", "text/plain; charset=latin1")
+      .send(conteudo);
+  } catch (error) {
+    console.error("Error generating manual shipment:", error);
+    reply.status(500).send({ error: "Error generating manual shipment:" });
+  }
 }

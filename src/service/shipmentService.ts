@@ -27,7 +27,7 @@ interface PagamentoPixDTO {
   dataPagamento: string;
 }
 
-export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
+export function shipmentPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
   const w = new CnabWriter();
   const hoje = new Date();
 
@@ -44,7 +44,7 @@ export function gerarRemessaPix(nsa: number, pagamentos: PagamentoPixDTO[]) {
       nomeEmpresa: env.EMPRESA_NOME,
       nomeBanco: "BANRISUL",
       dataGeracao: hoje,
-      nsa: 1,
+      nsa,
       versaoLayoutArquivo: "101",
     })
   );
