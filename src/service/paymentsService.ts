@@ -17,7 +17,7 @@ export async function listPayments(dataInicial: string, dataFinal: string) {
       "v.DT_VENCTO as dataPagamento",
       "f.TEL",
       "f.EMAIL",
-      "v.CD_CTR as seuNumero"
+      "v.CD_PG_CRED as seuNumero"
     )
     .whereBetween("v.DT_VENCTO", [dataInicial, dataFinal])
     .whereIn("v.STS_DP", [0, 2, 5]);
@@ -39,6 +39,20 @@ export async function insertPayments(
   }[]
 ) {
   return await knex.transaction(async (trx) => {
+    const dataAtual = new Date();
+    const dt_cad = dataAtual.toISOString().slice(0, 10);
+
+    const ddmm = `${dataAtual.getDate().toString().padStart(2, "0")}${(dataAtual.getMonth() + 1).toString().padStart(2, "0")}`;
+
+    const countResult = await trx("PG_DEB_PAGFOR_LOTE")
+      .where("dt_cad", dt_cad)
+      .count("* as total");
+
+    const sequencia = ((countResult[0]?.total as number) ?? 0) + 1;
+    const sufixo = sequencia.toString();
+
+    const nm_arq_rem = `C:\\CNAB\\PAGAR\\REMESSA\\BANRISUL${ddmm}${sufixo}.TXT`;
+
     const result = await trx("PG_DEB_PAGFOR_LOTE")
       .max("nr_arquivo as maxNrArquivo")
       .first();
@@ -56,8 +70,8 @@ export async function insertPayments(
       tp_servico: 20,
       forma_lancto: 0,
       cd_usu: cd_usu,
-      dt_cad: new Date().toISOString().slice(0, 10),
-      nm_arq_rem: `C:\\DOWNLOAD\\RESESSA${nr_arquivo.toString().padStart(3, "0")}.REM`,
+      dt_cad: dt_cad,
+      nm_arq_rem: nm_arq_rem,
       nm_arq_ret: null,
       sts_lote: 0,
     });
@@ -83,9 +97,19 @@ export async function insertPayments(
 
     await trx("PG_DEB_PAGFOR_CONTROLE").insert(insertsControle);
 
+    for (const item of selecionados) {
+      await trx("PG_CRED")
+        .where("CD_PG_CRED", item.cd_pg_cred)
+        .andWhere("CD_FILIAL", item.cd_filial)
+        .update({
+          STS_DP: 5,
+        });
+    }
+
     return {
       insertedId: insertLote[0],
       nr_arquivo,
+      nm_arq_rem,
       totalPagamentos: selecionados.length,
     };
   });
