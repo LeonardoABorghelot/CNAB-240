@@ -97,14 +97,37 @@ export async function insertPayments(
 
     await trx("PG_DEB_PAGFOR_CONTROLE").insert(insertsControle);
 
-    for (const item of selecionados) {
-      await trx("PG_CRED")
-        .where("CD_PG_CRED", item.cd_pg_cred)
-        .andWhere("CD_FILIAL", item.cd_filial)
-        .update({
-          STS_DP: 5,
-        });
-    }
+    const resultCtr = await trx("PG_CRED_HIST")
+      .max("cd_ctr as maxCdCtr")
+      .first();
+    const maxCdCtr = resultCtr?.maxCdCtr ?? 0;
+    const cd_ctr = (maxCdCtr || 0) + 1;
+
+    const insertsHistorico = selecionados.map((item) => ({
+      cd_emp: 1,
+      cd_filial: item.cd_filial,
+      cd_ctr: cd_ctr,
+      cd_pg_cred: item.cd_pg_cred,
+      hist: "REMESSA AGENDAMENTO",
+      dt_hist: dt_agendamento,
+      cd_usu: cd_usu,
+      cd_bc: BANCO_CODIGO,
+      nr_arquivo: nr_arquivo,
+      cd_ocorr: 0,
+    }));
+
+    await trx("PG_CRED_HIST").insert(insertsHistorico);
+
+    const updates = selecionados.map((item) =>
+      trx("PG_CRED")
+        .where({
+          CD_PG_CRED: item.cd_pg_cred,
+          CD_FILIAL: item.cd_filial,
+        })
+        .update({ STS_DP: 5 })
+    );
+
+    await Promise.all(updates);
 
     return {
       insertedId: insertLote[0],
